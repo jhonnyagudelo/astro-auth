@@ -17,7 +17,7 @@ import { ProtectedRoutes, PublicRoutes } from "@/helper/routes";
       <li class="font-semibold text-gray-700">
         <a href={`/${PublicRoutes.PUBLIC}/${PublicRoutes.LOGIN}`}>Ingresar</a>
       </li>
-      <li class="font-semibold text-gray-700">
+      <li id='logout' class="font-semibold text-gray-700">
         <a href="#">Salir</a>
       </li>
 
@@ -34,3 +34,13 @@ import { ProtectedRoutes, PublicRoutes } from "@/helper/routes";
     </ul>
   </div>
 </nav>
+
+
+<script>
+import { actions } from 'astro:actions';
+  const logoutElem = document.querySelector('#logout') as HTMLLIElement
+  logoutElem?.addEventListener('click',() => {
+  actions.logout(),
+  window.location.href='/'
+  })
+</script>
