@@ -1,9 +1,7 @@
 ---
-import { PublicRoutes } from '@/helper/routes';
 import {firebase} from '@/firebase/config'
+import { PublicRoutes } from '@/helper/routes';
 import MainLayout from "@/layouts/MainLayout.astro";
-// const firebaseUser = firebase?.auth?.currentUser
-
 
 const {user, isLoggedIn}=Astro.locals
 
@@ -11,14 +9,15 @@ if(!isLoggedIn || !user){
   return Astro.redirect(`/${PublicRoutes?.PUBLIC}/${PublicRoutes?.LOGIN}`)
 }
 
-const {avatar, name, email, emailVerified} = user; 
+const {avatar, name, email, } = user; 
 
-
+const firebaseUser = firebase?.auth?.currentUser
+await firebaseUser?.reload()
+const { emailVerified } = firebaseUser!
 
 // if(firebaseUser === null) {
 //   return Astro.redirect(`/${PublicRoutes?.PUBLIC}/${PublicRoutes?.LOGIN}`)
 // }
-// await firebaseUser.reload()
 // const {
 //   displayName,
 //   email,
