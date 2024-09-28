@@ -1,9 +1,10 @@
-export const PublicRoutes:AstroRoute = {
+export const PublicRoutes: AstroRoute = {
   LOGIN: "Login",
   PUBLIC: "public",
+  REGISTER: "Register",
 };
 
-export const ProtectedRoutes:AstroRoute = {
+export const ProtectedRoutes: AstroRoute = {
   PROTECTED: "Protected",
   PRIVATE: "protected",
 };

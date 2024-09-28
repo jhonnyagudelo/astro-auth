@@ -1,33 +1,37 @@
-import { ProtectedRoutes } from "@/helper/routes";
-import type { MiddlewareNext } from "astro";
+import { firebase } from "@/firebase/config";
+import { ProtectedRoutes, PublicRoutes } from "@/helper/routes";
+// import type { MiddlewareNext } from "astro";
 import { defineMiddleware } from "astro:middleware";
 
-// `context` y `next` son automáticamente tipados
+const privateRoutes = [
+	`/${ProtectedRoutes?.PRIVATE}/${ProtectedRoutes?.PROTECTED}`,
+];
+const notAuthenticatedRoutes = [
+	`/${PublicRoutes?.PUBLIC}/${PublicRoutes?.LOGIN}`,
+	`/${PublicRoutes?.PUBLIC}/${PublicRoutes?.REGISTER}`,
+];
 
-// const privateRoutes = [`/${ProtectedRoutes}`];
-const privateRoutes = ["/protected"];
+export const onRequest = defineMiddleware(
+	async ({ url, request, locals, redirect }, next) => {
+		const isLoggedIn = !!firebase?.auth?.currentUser;
+		const user = firebase?.auth?.currentUser;
 
-export const onRequest = defineMiddleware(async ({ url, request }, next) => {
-	const authHeaders = request.headers.get("authorization") ?? "";
-	if (privateRoutes?.includes(url.pathname)) {
-		return checkLocalAuth(authHeaders, next);
-	}
-	return next();
-});
-
-const checkLocalAuth = (authHeaders: string, next: MiddlewareNext) => {
-	if (authHeaders) {
-		const authValue = authHeaders.split(" ").at(-1) ?? "user:pass";
-		const decodedValue = atob(authValue).split(":");
-		const [user, password] = decodedValue;
-		if (user === "admin" && password === "admin") {
-			return next();
+		locals.isLoggedIn = isLoggedIn;
+		if (user) {
+			locals.user = {
+				avatar: user?.photoURL ?? "",
+				email: user?.email!,
+				name: user?.displayName!,
+				emailVerified: user?.emailVerified,
+			};
 		}
-	}
-	return new Response("Acceso no autorizado", {
-		status: 401,
-		headers: {
-			"WWW-Authenticate": 'Basic realm="Área Restringida"',
-		},
-	});
-};
+
+		if (!isLoggedIn && privateRoutes.includes(url.pathname)) {
+			return redirect("/");
+		}
+		if (isLoggedIn && notAuthenticatedRoutes.includes(url.pathname)) {
+			return redirect("/");
+		}
+		return next();
+	},
+);
